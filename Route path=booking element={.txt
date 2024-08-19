@@ -1,0 +1,6 @@
+        <Route path="/booking" element={
+        <Layout>
+          <p><Booking/></p>
+        </Layout>
+        }
+        />
