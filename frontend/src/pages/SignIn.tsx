@@ -39,8 +39,8 @@ const SignIn = () => {
 
   return (
     <form className="flex flex-col gap-5" onSubmit={onSubmit}>
-      <h2 className="text-3xl font-bold">Sign In</h2>
-      <label className="text-gray-700 text-sm font-bold flex-1">
+      <h2 className="text-3xl text-amber-500 font-bold">Sign In</h2>
+      <label className="text-amber-500 text-sm font-bold flex-1">
         Email
         <input
           type="email"
@@ -51,7 +51,7 @@ const SignIn = () => {
           <span className="text-red-500">{errors.email.message}</span>
         )}
       </label>
-      <label className="text-gray-700 text-sm font-bold flex-1">
+      <label className="text-amber-500 text-sm font-bold flex-1">
         Password
         <input
           type="password"
@@ -69,7 +69,7 @@ const SignIn = () => {
         )}
       </label>
       <span className="flex items-center justify-between">
-        <span className="text-sm">
+        <span className="text-sm text-amber-700">
           Not Registered?{" "}
           <Link className="underline" to="/register">
             Create an account here

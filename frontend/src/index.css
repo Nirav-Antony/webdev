@@ -2,3 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Rage-Italic";
+  src: url("./data/RAGE_1.TTF");
+}

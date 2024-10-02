@@ -7,6 +7,9 @@ import verifyToken from '../middleware/auth';
 
 const router = express.Router();
 
+// Define admin email or store it in environment variable
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+
 router.post(
   "/login",
   [
@@ -23,7 +26,7 @@ router.post(
     }
 
     const { email, password } = req.body;
-  // add logic to check for admin credentials here
+
     try {
       const user = await User.findOne({ email });
       if (!user) {
@@ -35,8 +38,11 @@ router.post(
         return res.status(400).json({ message: "Invalid Credentials" });
       }
 
+      // Check if the user is the admin
+      const isAdmin = email === ADMIN_EMAIL;
+
       const token = jwt.sign(
-        { userId: user.id },
+        { userId: user.id, isAdmin },  // Include isAdmin flag in JWT payload
         process.env.JWT_SECRET_KEY as string,
         {
           expiresIn: "1d",
@@ -48,7 +54,7 @@ router.post(
         secure: process.env.NODE_ENV === "production",
         maxAge: 86400000,
       });
-      res.status(200).json({ userId: user._id });
+      res.status(200).json({ userId: user._id, isAdmin }); // Send isAdmin in response if needed
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Something went wrong" });

@@ -6,17 +6,40 @@ import {
 } from "react-router-dom";
 import Layout from "./layouts/layout";
 import Register from "./pages/Register";
-//import Booking from "./pages/Booking"
+import BookingForm from "./pages/Booking"
 import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
+import Display from "./components/Display";
+import MAP from "./pages/map";
+import Landing from "./pages/home2";
+import Display2 from "./components/Display2";
+import Gallery from "./components/gallery";
 
 const App = () => {
   return (
     <Router>
       <Routes>
         <Route path="/" element=
-          {<Layout>
+          {<Layout >
+            <Landing />
             <Home />
+          </Layout>}
+        />
+
+
+
+        <Route path="/display" element=
+          {<Layout >
+            <Display />
+            <Gallery />
+          </Layout>}
+        />
+
+
+
+<Route path="/display2" element=
+          {<Layout >
+            <Display2 />
           </Layout>}
         />
 
@@ -31,7 +54,20 @@ const App = () => {
           </Layout>
         }
         />
-         {/* add Route for admin */}
+        <Route path="/bookings" element={
+          <Layout>
+            <BookingForm />
+          </Layout>
+        }
+        />
+
+<Route path="/map" element={
+          <Layout>
+            <MAP />
+          </Layout>
+        }
+        />
+        {/* add Route for admin */}
 
         <Route path="*" element={<Navigate to='/' />} />
       </Routes>

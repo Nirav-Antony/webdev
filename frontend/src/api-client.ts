@@ -1,3 +1,4 @@
+import { BookingFormData } from './pages/Booking';
 import { RegisterFormData } from './pages/Register';
 import { SignInFormData } from './pages/SignIn';
 
@@ -40,25 +41,51 @@ export const signIn = async(formData: SignInFormData) => {
   return body;
 };
 
+export const signOut = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+    credentials: "include",
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error("Error during sign out");
+  }
+};
 export const validateToken = async () => {
   const response = await fetch(`${API_BASE_URL}/api/auth/validate-token`, {
-    method: 'GET',
-    credentials: 'include',
-  })
-  if(!response.ok) {
-    throw new Error("Invalid token");
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Token invalid");
   }
+
   return response.json();
 };
 
 
-export const signOut = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
-    method: 'POST',
-    credentials: 'include',
-  });
+export const createRoomBooking = async (formData: BookingFormData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/bookings/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(formData),
+    });
 
-  if (!response.ok){
-    throw new Error("Failed to sign out");
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error(
+        `Server Error (${response.status}): ${errorData.message || "Unknown error"}`
+      );
+      throw new Error(errorData.message || "Error booking room");
+    }
+
+    return await response.json(); // Return response data if needed
+  } catch (error) {
+    console.error("Network or other error in createRoomBooking:", error);
+    throw error; // Re-throw the error after logging it
   }
 };

@@ -1,9 +1,13 @@
-import { useForm } from "react-hook-form";
-import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-//import { useSearchContext } from "../../contexts/SearchContext";
-import { useParams } from "react-router-dom";
-import { useMutation } from "react-query";
-//import { useAppContext } from "../../contexts/AppContext";
+import { useForm, Controller } from "react-hook-form";
+import { useMutation, useQueryClient } from "react-query";
+import * as apiClient from "../api-client";
+import { useAppContext } from "../contexts/AppContext";
+import { useNavigate } from "react-router-dom";
+//Simport CounterButton from "../components/CounterButton";
+//import { Unstable_NumberInput as NumberInput } from '@mui/base';
+import PersonCounter from "../components/PersonCounter";
+import RoomCounter from "../components/RoomCounter";
+
 
 
 export type BookingFormData = {
@@ -13,117 +17,138 @@ export type BookingFormData = {
   phoneNumber: string;
   checkIn: string;
   checkOut: string;
-  hotelId: string;
-  paymentIntentId: string;
-  totalCost: number;
+  adultCount: number;
+  roomCount: number;
 };
 
-const BookingForm = () => {
-  const stripe = useStripe();
-  const elements = useElements();
+const BookRoom = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { showToast } = useAppContext();
 
-  const { handleSubmit, register } = useForm<BookingFormData>({
-   
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<BookingFormData>();
+
+  const mutation = useMutation(apiClient.createRoomBooking, {
+    onSuccess: async () => {
+      showToast({ message: "Booking Successful!", type: "SUCCESS" });
+      await queryClient.invalidateQueries("myBookings");
+      navigate("/my-bookings");
+    },
+    onError: (error: Error) => {
+      showToast({ message: error.message, type: "ERROR" });
+    },
   });
 
-  const onSubmit = async (formData: BookingFormData) => {
-    if (!stripe || !elements) {
-      return;
-    }
-    // Perform your Stripe payment processing here
-
-    /*
-    const result = await stripe.confirmCardPayment(paymentIntent.clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement) as StripeCardElement,
-      },
-    });
-
-    if (result.paymentIntent?.status === "succeeded") {
-      // Perform booking action with formData
-    }
-    */
-  };
+  const onSubmit = handleSubmit((data) => {
+    mutation.mutate(data);
+  });
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="grid grid-cols-1 gap-5 rounded-lg border border-slate-300 p-5"
+      onSubmit={onSubmit}
+      className="grid grid-cols-1 top-10 gap-5 rounded-lg border border-black border-slate-300 p-5"
     >
-      <span className="text-3xl font-bold">Confirm Your Details</span>
+      <span className="text-3xl text-amber-500 font-bold">Confirm Your Details</span>
       <div className="grid grid-cols-2 gap-6">
-        <label className="text-gray-700 text-sm font-bold flex-1">
+        <label className="text-amber-700 text-sm font-bold flex-1">
           First Name
           <input
-            className="mt-1 border rounded w-full py-2 px-3 text-gray-700 bg-gray-200 font-normal"
+            className="mt-1 border rounded w-full py-2 px-3 text-amber-700 bg-gray-200 font-normal"
             type="text"
             readOnly
             disabled
             {...register("firstName")}
           />
         </label>
-        <label className="text-gray-700 text-sm font-bold flex-1">
+        <label className="text-amber-700 text-sm font-bold flex-1">
           Last Name
           <input
-            className="mt-1 border rounded w-full py-2 px-3 text-gray-700 bg-gray-200 font-normal"
+            className="mt-1 border rounded w-full py-2 px-3 text-amber-700 bg-gray-200 font-normal"
             type="text"
             readOnly
             disabled
             {...register("lastName")}
           />
         </label>
-        <label className="text-gray-700 text-sm font-bold flex-1">
+        <label className="text-amber-700 text-sm font-bold flex-1">
           Email
           <input
-            className="mt-1 border rounded w-full py-2 px-3 text-gray-700 bg-gray-200 font-normal"
+            className="mt-1 border rounded w-full py-2 px-3 text-amber-700 bg-gray-200 font-normal"
             type="text"
             readOnly
             disabled
             {...register("email")}
           />
         </label>
-        <label className="text-gray-700 text-sm font-bold flex-1">
+        <label className="text-amber-700 text-sm font-bold flex-1">
           Phone Number
           <input
-            className="mt-1 border rounded w-full py-2 px-3 text-gray-700 font-normal"
+            className="mt-1 border rounded w-full py-2 px-3 text-amber-700 font-normal"
             type="text"
-            {...register("phoneNumber", { required: true })}
+            {...register("phoneNumber", { required: "This field is required" })}
           />
+          {errors.phoneNumber && (
+            <span className="text-red-500">{errors.phoneNumber.message}</span>
+          )}
         </label>
       </div>
       <div className="grid grid-cols-2 gap-6">
-        <label className="text-gray-700 text-sm font-bold flex-1">
+        <label className="text-amber-700 text-sm font-bold flex-1">
           Check-in Date
           <input
-            className="mt-1 border rounded w-full py-2 px-3 text-gray-700 font-normal"
+            className="mt-1 border rounded w-full py-2 px-3 text-amber-700 font-normal"
             type="date"
-            {...register("checkIn", { required: true })}
+            {...register("checkIn", { required: "This field is required" })}
           />
+          {errors.checkIn && (
+            <span className="text-red-500">{errors.checkIn.message}</span>
+          )}
         </label>
-        <label className="text-gray-700 text-sm font-bold flex-1">
+        <label className="text-amber-700 text-sm font-bold flex-1">
           Check-out Date
           <input
-            className="mt-1 border rounded w-full py-2 px-3 text-gray-700 font-normal"
+            className="mt-1 border rounded w-full py-2 px-3 text-amber-700 font-normal"
             type="date"
-            {...register("checkOut", { required: true })}
+            {...register("checkOut", { required: "This field is required" })}
           />
+          {errors.checkOut && (
+            <span className="text-red-500">{errors.checkOut.message}</span>
+          )}
         </label>
+      </div>
+      <div className="grid grid-cols-2 gap-6">
+        <Controller
+          name="adultCount"
+          control={control}
+          defaultValue={0}
+          render={({ field }) => (
+            <PersonCounter value={field.value} onChange={field.onChange} />
+          )}
+        />
+        <Controller
+          name="roomCount"
+          control={control}
+          defaultValue={0}
+          render={({ field }) => (
+            <RoomCounter value={field.value} onChange={field.onChange} />
+          )}
+        />
       </div>
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">Your Price Summary</h2>
         <div className="bg-blue-200 p-4 rounded-md">
-          <div className="font-semibold text-lg">
-            Total Cost: 
-          </div>
+          <div className="font-semibold text-lg">Total Cost:</div>
           <div className="text-xs">Includes taxes and charges</div>
         </div>
       </div>
       <div className="space-y-2">
         <h3 className="text-xl font-semibold">Payment Details</h3>
-        <CardElement
-          id="payment-element"
-          className="border rounded-md p-2 text-sm"
-        />
+        {/* Payment details fields can be added here */}
       </div>
       <div className="flex justify-end">
         <button
@@ -137,4 +162,4 @@ const BookingForm = () => {
   );
 };
 
-export default BookingForm;
+export default BookRoom;
